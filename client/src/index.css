@@ -76,9 +76,10 @@
   --chart-4: 280 65% 60%;
   --chart-5: 340 82% 52%;
 
-  --font-sans: Inter, sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: JetBrains Mono, monospace;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-heading: 'Poppins', sans-serif;
   --radius: .5rem; /* 8px */
   --shadow-2xs: 0px 1px 2px 0px hsl(220 13% 13% / 0.05);
   --shadow-xs: 0px 1px 3px 0px hsl(220 13% 13% / 0.08);
