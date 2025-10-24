@@ -15,9 +15,7 @@ import Subscriptions from "@/pages/subscriptions";
 import Alerts from "@/pages/alerts";
 import Team from "@/pages/team";
 
-function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
-
+function Router({ isAuthenticated, isLoading }: { isAuthenticated: boolean; isLoading: boolean }) {
   return (
     <Switch>
       {isLoading || !isAuthenticated ? (
@@ -35,7 +33,7 @@ function Router() {
   );
 }
 
-function App() {
+function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
 
   // Sidebar width configuration - following design guidelines
@@ -45,30 +43,36 @@ function App() {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          {isLoading || !isAuthenticated ? (
-            <Router />
-          ) : (
-            <SidebarProvider style={sidebarStyle as React.CSSProperties}>
-              <div className="flex h-screen w-full">
-                <AppSidebar />
-                <div className="flex flex-col flex-1 overflow-hidden">
-                  <header className="flex items-center justify-between p-2 border-b h-14 flex-shrink-0">
-                    <SidebarTrigger data-testid="button-sidebar-toggle" />
-                    <ThemeToggle />
-                  </header>
-                  <main className="flex-1 overflow-auto">
-                    <Router />
-                  </main>
-                </div>
+    <ThemeProvider>
+      <TooltipProvider>
+        {isLoading || !isAuthenticated ? (
+          <Router isAuthenticated={isAuthenticated} isLoading={isLoading} />
+        ) : (
+          <SidebarProvider style={sidebarStyle as React.CSSProperties}>
+            <div className="flex h-screen w-full">
+              <AppSidebar />
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <header className="flex items-center justify-between p-2 border-b h-14 flex-shrink-0">
+                  <SidebarTrigger data-testid="button-sidebar-toggle" />
+                  <ThemeToggle />
+                </header>
+                <main className="flex-1 overflow-auto">
+                  <Router isAuthenticated={isAuthenticated} isLoading={isLoading} />
+                </main>
               </div>
-            </SidebarProvider>
-          )}
-          <Toaster />
-        </TooltipProvider>
-      </ThemeProvider>
+            </div>
+          </SidebarProvider>
+        )}
+        <Toaster />
+      </TooltipProvider>
+    </ThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppContent />
     </QueryClientProvider>
   );
 }
