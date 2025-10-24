@@ -77,6 +77,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validatedData.responsibleUserId = userId;
       }
 
+      // Convert renewalDate string to Date object for database
+      if (validatedData.renewalDate && typeof validatedData.renewalDate === 'string') {
+        validatedData.renewalDate = new Date(validatedData.renewalDate);
+      }
+
       const subscription = await storage.createSubscription(validatedData);
       res.status(201).json(subscription);
     } catch (error: any) {
@@ -106,6 +111,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate partial update
       const validatedData = insertSubscriptionSchema.partial().parse(req.body);
+      
+      // Convert renewalDate string to Date object for database
+      if (validatedData.renewalDate && typeof validatedData.renewalDate === 'string') {
+        validatedData.renewalDate = new Date(validatedData.renewalDate);
+      }
       
       const updated = await storage.updateSubscription(req.params.id, validatedData);
       res.json(updated);
