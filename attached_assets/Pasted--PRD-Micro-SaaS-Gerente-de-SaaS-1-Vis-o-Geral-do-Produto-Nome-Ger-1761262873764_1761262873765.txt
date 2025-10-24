@@ -1,0 +1,168 @@
+# 🧾 **PRD — Micro-SaaS “Gerente de SaaS”**
+
+---
+
+## 1. 📌 **Visão Geral do Produto**
+
+**Nome:** Gerente de SaaS
+**Versão:** 1.0 MVP
+**Modelo:** Micro-SaaS B2B (Low Ticket)
+**Preço:** US$ 19/mês por equipe (trial de 14 dias)
+**Mercado-alvo:** Startups, agências e pequenas empresas (5–50 pessoas)
+
+**Proposta de Valor:**
+
+> “Controle todas as assinaturas da sua empresa em um só painel.
+> Receba alertas antes de cada renovação, economize tempo e evite desperdício de dinheiro com softwares esquecidos.”
+
+---
+
+## 2. 🎯 **Objetivo do Produto**
+
+Resolver a dor de pequenas empresas que **perdem o controle de gastos e prazos de renovação de ferramentas SaaS**, trazendo **visibilidade, automação e economia**.
+
+---
+
+## 3. 🧩 **Principais Funcionalidades**
+
+### 3.1 Dashboard Central
+
+* Exibição em cards: nome, logo, custo, data de renovação, responsável e status.
+* Gráficos: pizza e barras para gastos mensais por categoria.
+* Indicadores: total mensal e previsão anual.
+
+### 3.2 Gestão de Assinaturas (CRUD)
+
+* Adicionar, editar e excluir assinaturas.
+* Campos:
+
+  * Nome do app
+  * Categoria
+  * Custo mensal/anual
+  * Data de renovação
+  * Método de pagamento
+  * Responsável interno
+  * Status (ativa, cancelada, em teste)
+  * Upload de fatura/recibo
+
+### 3.3 Alertas Automáticos
+
+* **Email e notificações no app**: 7 dias antes da renovação.
+* **Integração com WhatsApp via Twilio API**:
+
+  * Envio automático de mensagem personalizada:
+
+    > “⚠️ Lembrete: sua assinatura do *[App]* vence em *[Data]*. Valor: *[Custo]*.”
+  * Opção de resposta “OK” para confirmar pagamento.
+  * Logs no painel (status: enviado, entregue, lido).
+* Banner de alerta em vermelho no painel principal.
+
+### 3.4 Insights e Relatórios
+
+* Tendência de gastos mensais.
+* Sugestões de economia: detectar assinaturas redundantes.
+* Exportação CSV / PDF.
+* Benchmark: comparação anônima com média do mercado.
+
+### 3.5 Usuários e Permissões
+
+* Perfis:
+
+  * Admin: controle total
+  * Financeiro: acesso apenas a custos
+  * Usuário: acesso limitado às próprias assinaturas
+* Cada membro visualiza apenas suas ferramentas.
+
+### 3.6 Planos e Cobrança
+
+* Integração com **Stripe** (recorrência mensal).
+* Upgrade para plano Pro (US$ 39/mês).
+* Controle de faturamento e cancelamento dentro do app.
+
+---
+
+## 4. ⚙️ **Integrações**
+
+| Integração                | Descrição                                                            | Status          |
+| ------------------------- | -------------------------------------------------------------------- | --------------- |
+| **Twilio API (WhatsApp)** | Envio automatizado de lembretes de pagamento próximos ao vencimento. | ✅ MVP           |
+| **Gmail Webhook**         | Detectar recibos de assinatura renovada automaticamente.             | 🔜 Próxima fase |
+| **Google Sheets**         | Exportar relatórios de gastos.                                       | 🔜 Próxima fase |
+| **Slack Webhook**         | Alertas em canais corporativos.                                      | 🔜 Versão Pro   |
+
+---
+
+## 5. 💡 **Diferenciais Inteligentes (Fase 2)**
+
+1. **IA Financeira** – Sugestão de cancelamento de ferramentas subutilizadas.
+2. **Widget Embed** – Mini painel para embutir em Notion ou intranet.
+3. **Modo Auditoria** – Geração de relatórios para investidores.
+
+---
+
+## 6. 🎨 **Design e UX**
+
+* Estilo: **Notion + Linear + Apple Dashboard**
+* Paleta: branco, cinza-claro, azul-elétrico
+* Tipografia: Inter / Poppins
+* Layout responsivo (desktop + mobile)
+* Modo claro/escuro
+* Navegação simples e modular
+
+---
+
+## 7. 🧱 **Arquitetura Técnica**
+
+| Componente     | Stack / Serviço         |
+| -------------- | ----------------------- |
+| Frontend       | React + Tailwind        |
+| Backend        | Supabase ou Firebase    |
+| Banco de Dados | PostgreSQL              |
+| Autenticação   | Email + Google OAuth    |
+| Billing        | Stripe                  |
+| Notificações   | Email + Twilio WhatsApp |
+| Infraestrutura | Serverless (API REST)   |
+
+**Fluxo Twilio:**
+
+1. Evento → assinatura próxima do vencimento (7 dias).
+2. Função backend chama Twilio API (`/messages`).
+3. Twilio envia WhatsApp ao número cadastrado.
+4. Resposta do usuário registrada (webhook callback).
+5. Status exibido no painel (enviado, lido, confirmado).
+
+---
+
+## 8. 🪙 **KPIs de Sucesso**
+
+* Retenção de 90 % após 3 meses
+* Tempo médio de configuração < 10 min
+* 80 % de redução em renovações esquecidas
+* 25 % de aumento no uso de relatórios mensais
+
+---
+
+## 9. 🧭 **Roadmap de Lançamento**
+
+| Fase       | Entregáveis                           | Prazo      |
+| ---------- | ------------------------------------- | ---------- |
+| **Fase 1** | MVP com alertas e WhatsApp via Twilio | 4 semanas  |
+| **Fase 2** | Relatórios + IA Financeira            | 8 semanas  |
+| **Fase 3** | Integrações avançadas (Slack, Gmail)  | 12 semanas |
+
+---
+
+## 10. 📈 **Crescimento e Aquisição**
+
+* **Canais:** Product Hunt, comunidades SaaS, YouTube “Ferramentas para Startups”
+* **Parcerias:** coworkings e aceleradoras
+* **Funil:** gratuito limitado → $19/mês → plano Pro
+* **Referral:** “Convide um amigo e ganhe 1 mês grátis”
+
+---
+
+## 11. 📢 **Mensagem de Lançamento (Landing Page)**
+
+> “Você sabe quanto gasta com softwares por mês?
+> O Gerente de SaaS organiza suas assinaturas, envia alertas — inclusive no WhatsApp — e ajuda você a cortar desperdícios.
+> Comece grátis por 14 dias.”
