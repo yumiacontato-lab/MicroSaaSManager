@@ -124,7 +124,10 @@ export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
 }).extend({
   monthlyCost: z.string().optional(),
   annualCost: z.string().optional(),
-  renewalDate: z.string().or(z.date()),
+  renewalDate: z.union([
+    z.date(),
+    z.string().transform(val => new Date(val))
+  ]),
 });
 
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;

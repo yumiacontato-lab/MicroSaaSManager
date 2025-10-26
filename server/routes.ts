@@ -69,17 +69,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
-      // Validate request body
+      // Validate request body - renewalDate will be automatically transformed to Date by Zod
       const validatedData = insertSubscriptionSchema.parse(req.body);
       
       // Set responsible user to current user if not provided
       if (!validatedData.responsibleUserId) {
         validatedData.responsibleUserId = userId;
-      }
-
-      // Convert renewalDate string to Date object for database
-      if (validatedData.renewalDate && typeof validatedData.renewalDate === 'string') {
-        validatedData.renewalDate = new Date(validatedData.renewalDate);
       }
 
       // Convert empty strings to undefined for numeric fields
@@ -117,13 +112,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      // Validate partial update
+      // Validate partial update - renewalDate will be automatically transformed to Date by Zod
       const validatedData = insertSubscriptionSchema.partial().parse(req.body);
-      
-      // Convert renewalDate string to Date object for database
-      if (validatedData.renewalDate && typeof validatedData.renewalDate === 'string') {
-        validatedData.renewalDate = new Date(validatedData.renewalDate);
-      }
 
       // Convert empty strings to undefined for numeric fields
       if (validatedData.monthlyCost === '') {
