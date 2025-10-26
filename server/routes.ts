@@ -82,6 +82,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validatedData.renewalDate = new Date(validatedData.renewalDate);
       }
 
+      // Convert empty strings to undefined for numeric fields
+      if (validatedData.monthlyCost === '') {
+        validatedData.monthlyCost = undefined;
+      }
+      if (validatedData.annualCost === '') {
+        validatedData.annualCost = undefined;
+      }
+
       const subscription = await storage.createSubscription(validatedData);
       res.status(201).json(subscription);
     } catch (error: any) {
@@ -115,6 +123,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert renewalDate string to Date object for database
       if (validatedData.renewalDate && typeof validatedData.renewalDate === 'string') {
         validatedData.renewalDate = new Date(validatedData.renewalDate);
+      }
+
+      // Convert empty strings to undefined for numeric fields
+      if (validatedData.monthlyCost === '') {
+        validatedData.monthlyCost = undefined;
+      }
+      if (validatedData.annualCost === '') {
+        validatedData.annualCost = undefined;
       }
       
       const updated = await storage.updateSubscription(req.params.id, validatedData);
