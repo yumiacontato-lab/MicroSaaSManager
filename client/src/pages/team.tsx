@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect } from "react";
@@ -67,11 +68,16 @@ export default function Team() {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div>
-        <h1 className="font-heading font-bold text-3xl md:text-4xl">Equipe</h1>
-        <p className="text-muted-foreground mt-1">
-          Gerencie os membros da sua equipe e permissões
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-heading font-bold text-3xl md:text-4xl">Equipe</h1>
+          <p className="text-muted-foreground mt-1">
+            Gerencie os membros da sua equipe e permissões
+          </p>
+        </div>
+        <Button onClick={() => toast({ title: "Em breve", description: "O convite de membros estará disponível em breve." })}>
+          Convidar Membro
+        </Button>
       </div>
 
       <Card>

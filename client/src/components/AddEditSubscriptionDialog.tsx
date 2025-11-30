@@ -26,6 +26,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Subscription, InsertSubscription } from "@shared/schema";
 import { insertSubscriptionSchema } from "@shared/schema";
+import { z } from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
@@ -75,7 +76,7 @@ export function AddEditSubscriptionDialog({
   const queryClient = useQueryClient();
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  const form = useForm<InsertSubscription>({
+  const form = useForm<z.input<typeof insertSubscriptionSchema>>({
     resolver: zodResolver(insertSubscriptionSchema),
     defaultValues: subscription ? {
       appName: subscription.appName,
@@ -107,7 +108,7 @@ export function AddEditSubscriptionDialog({
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: InsertSubscription) => {
+    mutationFn: async (data: z.input<typeof insertSubscriptionSchema>) => {
       const url = subscription ? `/api/subscriptions/${subscription.id}` : "/api/subscriptions";
       const method = subscription ? "PUT" : "POST";
       await apiRequest(method, url, data);
@@ -117,7 +118,7 @@ export function AddEditSubscriptionDialog({
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       toast({
         title: subscription ? "Assinatura atualizada" : "Assinatura criada",
-        description: subscription 
+        description: subscription
           ? "As alterações foram salvas com sucesso."
           : "Sua assinatura foi adicionada ao painel.",
       });
@@ -144,7 +145,7 @@ export function AddEditSubscriptionDialog({
     },
   });
 
-  const onSubmit = (data: InsertSubscription) => {
+  const onSubmit = (data: z.input<typeof insertSubscriptionSchema>) => {
     mutation.mutate(data);
   };
 
@@ -166,7 +167,7 @@ export function AddEditSubscriptionDialog({
                   <FormItem>
                     <FormLabel>Nome da Aplicação</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: Slack, Notion..." {...field} data-testid="input-app-name" />
+                      <Input placeholder="Ex: Slack, Notion..." {...field} value={field.value ?? ""} data-testid="input-app-name" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -179,7 +180,7 @@ export function AddEditSubscriptionDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Categoria</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
                       <FormControl>
                         <SelectTrigger data-testid="select-category">
                           <SelectValue placeholder="Selecione a categoria" />
@@ -206,7 +207,7 @@ export function AddEditSubscriptionDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ciclo de Cobrança</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
                       <FormControl>
                         <SelectTrigger data-testid="select-billing-cycle">
                           <SelectValue />
@@ -236,6 +237,7 @@ export function AddEditSubscriptionDialog({
                         step="0.01"
                         placeholder="0.00"
                         {...field}
+                        value={field.value ?? ""}
                         data-testid="input-cost"
                       />
                     </FormControl>
@@ -295,7 +297,7 @@ export function AddEditSubscriptionDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Método de Pagamento</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
                       <FormControl>
                         <SelectTrigger data-testid="select-payment-method">
                           <SelectValue />
@@ -321,7 +323,7 @@ export function AddEditSubscriptionDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
                     <FormControl>
                       <SelectTrigger data-testid="select-status">
                         <SelectValue />
@@ -347,7 +349,7 @@ export function AddEditSubscriptionDialog({
                 <FormItem>
                   <FormLabel>URL do Logo (opcional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} data-testid="input-logo-url" />
+                    <Input placeholder="https://..." {...field} value={field.value ?? ""} data-testid="input-logo-url" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -361,7 +363,7 @@ export function AddEditSubscriptionDialog({
                 <FormItem>
                   <FormLabel>URL da Nota Fiscal (opcional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} data-testid="input-invoice-url" />
+                    <Input placeholder="https://..." {...field} value={field.value ?? ""} data-testid="input-invoice-url" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -380,6 +382,7 @@ export function AddEditSubscriptionDialog({
                       className="resize-none"
                       rows={3}
                       {...field}
+                      value={field.value ?? ""}
                       data-testid="textarea-notes"
                     />
                   </FormControl>
