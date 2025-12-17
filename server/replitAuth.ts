@@ -65,6 +65,7 @@ async function upsertUser(
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+    phoneNumber: claims["phone_number"],
   });
 }
 
@@ -134,41 +135,33 @@ export async function setupAuth(app: Express) {
     // Local Dev Auth Setup
     console.log("Setting up Local Dev Auth...");
 
-    passport.use(new LocalStrategy(
-      async (username, password, done) => {
-        // Mock user for dev
-        const mockUser = {
-          claims: {
-            sub: "dev-user-id",
-            email: "dev@example.com",
-            first_name: "Dev",
-            last_name: "User",
-            profile_image_url: "",
-            exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24h expiry
-          },
-          expires_at: Math.floor(Date.now() / 1000) + (24 * 60 * 60)
-        };
+    app.get("/api/login", async (req, res) => {
+      // Auto-login for dev - create mock user and login directly
+      const mockUser = {
+        claims: {
+          sub: "dev-user-id",
+          email: "dev@example.com",
+          first_name: "Dev",
+          last_name: "User",
+          profile_image_url: "",
+          phone_number: "+5511999999999", // Mock phone for testing WhatsApp
+          exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24h expiry
+        },
+        expires_at: Math.floor(Date.now() / 1000) + (24 * 60 * 60)
+      };
 
-        // Ensure user exists in DB
-        await upsertUser(mockUser.claims);
+      // Ensure user exists in DB
+      await upsertUser(mockUser.claims);
 
-        return done(null, mockUser);
-      }
-    ));
-
-    app.get("/api/login", (req, res, next) => {
-      // Auto-login for dev
-      passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/login-failed'
-      })(req, res, next);
+      // Login the user
+      req.login(mockUser, (err) => {
+        if (err) {
+          console.error("Login error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
+        res.redirect("/");
+      });
     });
-
-    // Trigger local login immediately when hitting this route
-    app.post("/api/login", passport.authenticate('local', {
-      successRedirect: '/',
-      failureRedirect: '/login-failed'
-    }));
 
     app.get("/api/logout", (req, res) => {
       req.logout(() => {

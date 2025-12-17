@@ -40,6 +40,9 @@ export const billingCycleEnum = pgEnum('billing_cycle', ['monthly', 'annual']);
 // WhatsApp alert status enum
 export const alertStatusEnum = pgEnum('alert_status', ['pending', 'sent', 'delivered', 'read', 'failed']);
 
+// Currency enum
+export const currencyEnum = pgEnum('currency', ['USD', 'BRL']);
+
 // User storage table - Required for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -66,6 +69,7 @@ export const subscriptions = pgTable("subscriptions", {
   monthlyCost: decimal("monthly_cost", { precision: 10, scale: 2 }),
   annualCost: decimal("annual_cost", { precision: 10, scale: 2 }),
   billingCycle: billingCycleEnum("billing_cycle").default('monthly').notNull(),
+  currency: currencyEnum("currency").default('USD').notNull(),
   renewalDate: timestamp("renewal_date").notNull(),
   paymentMethod: paymentMethodEnum("payment_method").notNull(),
   responsibleUserId: varchar("responsible_user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),

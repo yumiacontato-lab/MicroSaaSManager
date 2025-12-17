@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -67,6 +67,11 @@ const statuses = [
   { value: "cancelled", label: "Cancelada" },
 ];
 
+const currencies = [
+  { value: "USD", label: "Dólar (USD)", symbol: "$" },
+  { value: "BRL", label: "Real (BRL)", symbol: "R$" },
+];
+
 export function AddEditSubscriptionDialog({
   open,
   onOpenChange,
@@ -84,6 +89,7 @@ export function AddEditSubscriptionDialog({
       monthlyCost: subscription.monthlyCost || "",
       annualCost: subscription.annualCost || "",
       billingCycle: subscription.billingCycle,
+      currency: subscription.currency || "USD",
       renewalDate: subscription.renewalDate ? format(new Date(subscription.renewalDate), "yyyy-MM-dd") : "",
       paymentMethod: subscription.paymentMethod,
       responsibleUserId: subscription.responsibleUserId,
@@ -97,6 +103,7 @@ export function AddEditSubscriptionDialog({
       monthlyCost: "",
       annualCost: "",
       billingCycle: "monthly",
+      currency: "USD",
       renewalDate: "",
       paymentMethod: "credit_card",
       responsibleUserId: "", // Will be set from current user
@@ -106,6 +113,44 @@ export function AddEditSubscriptionDialog({
       notes: "",
     },
   });
+
+  // Reset form when subscription changes (for edit mode)
+  useEffect(() => {
+    if (subscription) {
+      form.reset({
+        appName: subscription.appName,
+        category: subscription.category,
+        monthlyCost: subscription.monthlyCost || "",
+        annualCost: subscription.annualCost || "",
+        billingCycle: subscription.billingCycle,
+        currency: subscription.currency || "USD",
+        renewalDate: subscription.renewalDate ? format(new Date(subscription.renewalDate), "yyyy-MM-dd") : "",
+        paymentMethod: subscription.paymentMethod,
+        responsibleUserId: subscription.responsibleUserId,
+        status: subscription.status,
+        logoUrl: subscription.logoUrl || "",
+        invoiceUrl: subscription.invoiceUrl || "",
+        notes: subscription.notes || "",
+      });
+    } else {
+      form.reset({
+        appName: "",
+        category: categories[0],
+        monthlyCost: "",
+        annualCost: "",
+        billingCycle: "monthly",
+        currency: "USD",
+        renewalDate: "",
+        paymentMethod: "credit_card",
+        responsibleUserId: "",
+        status: "active",
+        logoUrl: "",
+        invoiceUrl: "",
+        notes: "",
+      });
+    }
+  }, [subscription, form]);
+
 
   const mutation = useMutation({
     mutationFn: async (data: z.input<typeof insertSubscriptionSchema>) => {
@@ -200,7 +245,7 @@ export function AddEditSubscriptionDialog({
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="billingCycle"
@@ -216,6 +261,31 @@ export function AddEditSubscriptionDialog({
                       <SelectContent>
                         <SelectItem value="monthly">Mensal</SelectItem>
                         <SelectItem value="annual">Anual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Moeda</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value ?? "USD"}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-currency">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {currencies.map((currency) => (
+                          <SelectItem key={currency.value} value={currency.value}>
+                            {currency.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -74,12 +74,12 @@ export default function Dashboard() {
   // Calculate metrics
   const activeSubscriptions = subscriptions.filter(s => s.status === 'active');
   const totalMonthly = activeSubscriptions.reduce((sum, sub) => {
-    const cost = sub.billingCycle === 'monthly' 
+    const cost = sub.billingCycle === 'monthly'
       ? parseFloat(sub.monthlyCost || '0')
       : parseFloat(sub.annualCost || '0') / 12;
     return sum + cost;
   }, 0);
-  
+
   const totalAnnual = totalMonthly * 12;
 
   // Expiring soon (within 7 days)
@@ -90,10 +90,10 @@ export default function Dashboard() {
 
   // Spending by category for pie chart
   const categorySpending = activeSubscriptions.reduce((acc, sub) => {
-    const cost = sub.billingCycle === 'monthly' 
+    const cost = sub.billingCycle === 'monthly'
       ? parseFloat(sub.monthlyCost || '0')
       : parseFloat(sub.annualCost || '0') / 12;
-    
+
     if (!acc[sub.category]) {
       acc[sub.category] = 0;
     }
@@ -131,6 +131,14 @@ export default function Dashboard() {
       case 'trial': return 'Teste';
       case 'cancelled': return 'Cancelada';
       default: return status;
+    }
+  };
+
+  const getCurrencySymbol = (currency: string | undefined) => {
+    switch (currency) {
+      case 'BRL': return 'R$';
+      case 'USD':
+      default: return '$';
     }
   };
 
@@ -321,25 +329,29 @@ export default function Dashboard() {
             {subscriptions.map((subscription) => {
               const daysUntilRenewal = differenceInDays(new Date(subscription.renewalDate), new Date());
               const isExpiringSoon = daysUntilRenewal >= 0 && daysUntilRenewal <= 7;
-              
+
               return (
                 <Card key={subscription.id} className="hover-elevate relative" data-testid={`card-subscription-${subscription.id}`}>
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         {subscription.logoUrl ? (
-                          <img 
-                            src={subscription.logoUrl} 
+                          <img
+                            src={subscription.logoUrl}
                             alt={subscription.appName}
-                            className="w-8 h-8 rounded-md object-cover flex-shrink-0"
+                            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                            onError={(e) => {
+                              // Hide broken image and show fallback
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
                           />
-                        ) : (
-                          <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-semibold text-primary">
-                              {subscription.appName[0].toUpperCase()}
-                            </span>
-                          </div>
-                        )}
+                        ) : null}
+                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 ${subscription.logoUrl ? 'hidden' : ''}`}>
+                          <span className="text-base font-bold text-primary-foreground">
+                            {subscription.appName[0].toUpperCase()}
+                          </span>
+                        </div>
                         <div className="min-w-0 flex-1">
                           <CardTitle className="text-base font-semibold truncate">
                             {subscription.appName}
@@ -368,7 +380,7 @@ export default function Dashboard() {
                   <CardContent className="space-y-4">
                     <div>
                       <div className="font-mono font-bold text-2xl">
-                        ${subscription.billingCycle === 'monthly' 
+                        {getCurrencySymbol(subscription.currency)}{subscription.billingCycle === 'monthly'
                           ? parseFloat(subscription.monthlyCost || '0').toFixed(2)
                           : (parseFloat(subscription.annualCost || '0') / 12).toFixed(2)}
                       </div>
@@ -376,7 +388,7 @@ export default function Dashboard() {
                         por {subscription.billingCycle === 'monthly' ? 'mês' : 'mês (anual)'}
                       </p>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Renovação</span>
