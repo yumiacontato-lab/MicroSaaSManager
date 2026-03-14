@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -10,10 +11,20 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
-import Dashboard from "@/pages/dashboard";
-import Subscriptions from "@/pages/subscriptions";
-import Alerts from "@/pages/alerts";
-import Team from "@/pages/team";
+
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Subscriptions = lazy(() => import("@/pages/subscriptions"));
+const Alerts = lazy(() => import("@/pages/alerts"));
+const Team = lazy(() => import("@/pages/team"));
+
+function RouteFallback() {
+  return (
+    <div className="p-6">
+      <div className="animate-pulse rounded-md h-8 w-40 bg-muted mb-4" />
+      <div className="animate-pulse rounded-md h-24 w-full bg-muted" />
+    </div>
+  );
+}
 
 function Router({ isAuthenticated, isLoading }: { isAuthenticated: boolean; isLoading: boolean }) {
   return (
@@ -22,10 +33,26 @@ function Router({ isAuthenticated, isLoading }: { isAuthenticated: boolean; isLo
         <Route path="/" component={Landing} />
       ) : (
         <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/subscriptions" component={Subscriptions} />
-          <Route path="/alerts" component={Alerts} />
-          <Route path="/team" component={Team} />
+          <Route path="/">
+            <Suspense fallback={<RouteFallback />}>
+              <Dashboard />
+            </Suspense>
+          </Route>
+          <Route path="/subscriptions">
+            <Suspense fallback={<RouteFallback />}>
+              <Subscriptions />
+            </Suspense>
+          </Route>
+          <Route path="/alerts">
+            <Suspense fallback={<RouteFallback />}>
+              <Alerts />
+            </Suspense>
+          </Route>
+          <Route path="/team">
+            <Suspense fallback={<RouteFallback />}>
+              <Team />
+            </Suspense>
+          </Route>
         </>
       )}
       <Route component={NotFound} />

@@ -1,9 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Plus,
   Calendar,
@@ -23,17 +33,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AddEditSubscriptionDialog } from "@/components/AddEditSubscriptionDialog";
-import { format, isPast, differenceInDays, addDays } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | undefined>();
+  const [subscriptionToDelete, setSubscriptionToDelete] = useState<Subscription | undefined>();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -52,6 +65,40 @@ export default function Dashboard() {
   const { data: subscriptions = [], isLoading } = useQuery<Subscription[]>({
     queryKey: ["/api/subscriptions"],
     enabled: !!user,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (subscriptionId: string) => {
+      await apiRequest("DELETE", `/api/subscriptions/${subscriptionId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      toast({
+        title: "Assinatura excluída",
+        description: "A despesa foi removida com sucesso.",
+      });
+      setSubscriptionToDelete(undefined);
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Não autenticado",
+          description: "Você foi desconectado. Redirecionando...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+
+      toast({
+        title: "Erro ao excluir",
+        description: error.message || "Não foi possível excluir a despesa.",
+        variant: "destructive",
+      });
+    },
   });
 
   if (authLoading) {
@@ -150,6 +197,15 @@ export default function Dashboard() {
   const handleAddNew = () => {
     setEditingSubscription(undefined);
     setDialogOpen(true);
+  };
+
+  const handleDeleteClick = (subscription: Subscription) => {
+    setSubscriptionToDelete(subscription);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!subscriptionToDelete) return;
+    deleteMutation.mutate(subscriptionToDelete.id);
   };
 
   return (
@@ -369,7 +425,11 @@ export default function Dashboard() {
                             <Edit className="h-4 w-4 mr-2" />
                             Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive" data-testid={`button-delete-${subscription.id}`}>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeleteClick(subscription)}
+                            data-testid={`button-delete-${subscription.id}`}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Excluir
                           </DropdownMenuItem>
@@ -420,6 +480,36 @@ export default function Dashboard() {
         onOpenChange={setDialogOpen}
         subscription={editingSubscription}
       />
+
+      <AlertDialog
+        open={!!subscriptionToDelete}
+        onOpenChange={(open) => {
+          if (!open && !deleteMutation.isPending) {
+            setSubscriptionToDelete(undefined);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir despesa</AlertDialogTitle>
+            <AlertDialogDescription>
+              {subscriptionToDelete
+                ? `Tem certeza que deseja excluir ${subscriptionToDelete.appName}? Esta ação não pode ser desfeita.`
+                : "Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+              data-testid="button-confirm-delete-subscription"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
